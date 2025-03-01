@@ -10,6 +10,8 @@ class MinimaxAi : public GameAi
     static constexpr int kAi = 2;
     static constexpr int kPlayer = 1;
 
+    static constexpr int kScoreInf = 10000000;
+
     static constexpr int kWinMoveValue = 100;
     static constexpr int kForkValue = 15;
     static constexpr int kBlockValue = 8;
@@ -30,28 +32,52 @@ public:
 
     int Minimax(Board* pBoard, int depth, bool isMax, int alpha, int beta)
     {
-        int boardScore = EvaluateBoard(pBoard);
+        std::unique_ptr<Board> clonedBoard(pBoard->Clone());
+
+        int boardScore = EvaluateBoard(clonedBoard);
 
         if (boardScore == kWinMoveValue || boardScore == -kWinMoveValue)
             return boardScore;
-        if (pBoard->GetWinner() == -1)
+        if (clonedBoard->GetWinner() == -1)
             return kTieValue; // Tie
+
+        std::vector<Move> legalMoves = pBoard->GetLegalMoves();
 
         if (isMax)
         {
-            int best = -1000;
-            for(int i = 0; i < 9; ++i)
+            int best = -kScoreInf;
+            for (Move move : legalMoves)
             {
-                if (pBoard->)
+                clonedBoard->MakeMove(move, kAi);
+                best = Minimax(clonedBoard, depth + 1, false, alpha, beta);
+                delete clonedBoard;
+
+                alpha = std::max(alpha, best);
+                if (beta <= alpha) break; // pruning
             }
+            
+            return best;
+        }
+        else
+        {
+            int best = -kScoreInf;
+            for (Move move : legalMoves)
+            {
+                clonedBoard->MakeMove(clonedBoard, depth + 1, true, alpha, beta);
+                delete clonedBoard;
+
+                beta = std::min(beta, best);
+                if (beta <= alpha) break; // pruning
+            }
+
+            return best;
         }
     }
 
     int EvaluateBoard(Board* pBoard)
     {
-        const auto cloneBoard = pBoard->Clone();
-
-        auto board = cloneBoard->GetBoardHash();
+        
+        auto board = pBoard->GetBoardHash();
         int score = 0;
 
         // Check rows, columns, and diagonals for potential wins, forks, blocks
@@ -80,8 +106,6 @@ public:
             if (board[corner] == kAi) score += kCornerValue;
             else if (board[corner] == kPlayer) score -= kCornerValue;
         }
-
-        delete cloneBoard;
 
         return score;
     }
