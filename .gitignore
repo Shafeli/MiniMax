@@ -1,0 +1,32 @@
+# Ignore build files
+build/
+CMakeFiles/
+CMakeCache.txt
+
+# Ignore compiled binaries
+*.exe
+*.out
+*.obj
+*.o
+*.dll
+*.lib
+*.a
+*.so
+*.pdb
+
+# Ignore temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+*.bak
+
+# Ignore Visual Studio files
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.sln
+
+# Ignore Code::Blocks files
+*.cbp
+*.layout
