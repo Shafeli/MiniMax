@@ -30,51 +30,49 @@ public:
 
     }
 
-    int Minimax(Board* pBoard, int depth, bool isMax, int alpha, int beta)
+    int Minimax(const Board* pBoard, int depth, bool isMax, int alpha, int beta)
     {
         std::unique_ptr<Board> clonedBoard(pBoard->Clone());
 
-        int boardScore = EvaluateBoard(clonedBoard);
-
-        if (boardScore == kWinMoveValue || boardScore == -kWinMoveValue)
-            return boardScore;
-        if (clonedBoard->GetWinner() == -1)
-            return kTieValue; // Tie
-
+        // Get legal moves
         std::vector<Move> legalMoves = pBoard->GetLegalMoves();
 
-        if (isMax)
-        {
-            int best = -kScoreInf;
-            for (Move move : legalMoves)
-            {
-                clonedBoard->MakeMove(move, kAi);
-                best = Minimax(clonedBoard, depth + 1, false, alpha, beta);
-                delete clonedBoard;
+        int best = isMax ? -kScoreInf : kScoreInf;
 
+        for (const Move& move : legalMoves)
+        {
+            clonedBoard->MakeMove(move);
+
+            // Check for a winner immediately after the move
+            int winner = clonedBoard->GetWinner();
+            if (winner == kAi) {
+                return kWinMoveValue;  // AI wins
+            }
+            else if (winner == kPlayer) {
+                return -kWinMoveValue;  // Player wins
+            }
+
+            // If there’s no winner, continue the minimax search
+            int moveScore = Minimax(clonedBoard.get(), depth + 1, !isMax, alpha, beta);
+
+            if (isMax)
+            {
+                best = std::max(best, moveScore);
                 alpha = std::max(alpha, best);
-                if (beta <= alpha) break; // pruning
             }
-            
-            return best;
-        }
-        else
-        {
-            int best = -kScoreInf;
-            for (Move move : legalMoves)
+            else
             {
-                clonedBoard->MakeMove(clonedBoard, depth + 1, true, alpha, beta);
-                delete clonedBoard;
-
+                best = std::min(best, moveScore);
                 beta = std::min(beta, best);
-                if (beta <= alpha) break; // pruning
             }
 
-            return best;
+            if (beta <= alpha) break;  // Alpha-beta pruning
         }
+
+        return best;
     }
 
-    int EvaluateBoard(Board* pBoard)
+    int EvaluateBoard(const Board* pBoard)
     {
         
         auto board = pBoard->GetBoardHash();

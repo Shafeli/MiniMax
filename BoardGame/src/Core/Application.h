@@ -11,6 +11,7 @@
 #endif
 
 #include "../GenericImplementations/RandomAi.h"
+#include "../MinimaxAi/MinimaxAi.h"
 
 class Application
 {
@@ -20,7 +21,8 @@ class Application
     ConnectFourBoard m_board;
 #endif
 
-    RandomAi m_ai;  // TODO: Replace this with your AI implementation
+    //RandomAi m_ai;  // TODO: Replace this with your AI implementation
+    MinimaxAi m_ai;  // TODO: Replace this with your AI implementation
 
 public:
     Application();
