@@ -16,6 +16,7 @@ class MinimaxAi : public GameAi
     static constexpr int kCenterControlValue = 5;
     static constexpr int kBlockFork = 10;
     static constexpr int kCornerValue = 3;
+    static constexpr int kTieValue = 0;
 
 
     AITasksQueue m_tasksQueue;
@@ -25,6 +26,25 @@ public:
         : GameAi(pBoard)
     {
 
+    }
+
+    int Minimax(Board* pBoard, int depth, bool isMax, int alpha, int beta)
+    {
+        int boardScore = EvaluateBoard(pBoard);
+
+        if (boardScore == kWinMoveValue || boardScore == -kWinMoveValue)
+            return boardScore;
+        if (pBoard->GetWinner() == -1)
+            return kTieValue; // Tie
+
+        if (isMax)
+        {
+            int best = -1000;
+            for(int i = 0; i < 9; ++i)
+            {
+                if (pBoard->)
+            }
+        }
     }
 
     int EvaluateBoard(Board* pBoard)
@@ -75,15 +95,15 @@ public:
         else if (a == kPlayer && b == kPlayer && c == kPlayer) score -= kWinMoveValue;
 
         // AI two in a row with empty space
-        else if ((a == kAi && b == kAi && c == 0) ||
-            (a == kAi && c == kAi && b == 0) ||
-            (b == kAi && c == kAi && a == 0))
+        else if (a == kAi && b == kAi && c == 0 ||
+            a == kAi && c == kAi && b == 0 ||
+            b == kAi && c == kAi && a == 0)
             score += kForkValue;
 
         // Player two in a row with empty space (block)
-        else if ((a == kPlayer && b == kPlayer && c == 0) ||
-            (a == kPlayer && c == kPlayer && b == 0) ||
-            (b == kPlayer && c == kPlayer && a == 0))
+        else if (a == kPlayer && b == kPlayer && c == 0 ||
+            a == kPlayer && c == kPlayer && b == 0 ||
+            b == kPlayer && c == kPlayer && a == 0)
             score -= kBlockValue;
 
         return score;
