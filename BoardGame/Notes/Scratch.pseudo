@@ -2,7 +2,7 @@
 Vocabulary
     fork = a multiple win conditions board
 
-    Constants
+    Constants 
         kWinValue = 100
         kForkValue = 15
         kBlockValue = 8
@@ -10,7 +10,7 @@ Vocabulary
         kBlockFork = 10
         kCornerValue = 3
 
-TicTacToe Strategy Ai Scores
+Connect Four Strategy Ai Scores
     Ai Wins = kWinValue
     Op Wins = -kWinValue
     Ai Blocks = kBlockValue
