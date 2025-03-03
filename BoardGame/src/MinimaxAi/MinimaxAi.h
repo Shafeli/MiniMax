@@ -7,7 +7,7 @@
 #include "../Interface/GameAi.h"
 #include "../TicTacToe/TicTacToeBoard.h"
 
-class TicTacToeMinimaxAi : public GameAi
+class MinimaxAi : public GameAi
 {
     static constexpr int kAi = 2;
     static constexpr int kPlayer = 1;
@@ -15,33 +15,37 @@ class TicTacToeMinimaxAi : public GameAi
     static constexpr int kScoreInf = 10000000;
 
     static constexpr int kWinMoveValue = 100;
-    static constexpr int kTieValue = 150;
-    static constexpr int kMaxDepth = 14;  // Set a reasonable max depth
+    static constexpr int kAiFavorableBoardValue = 75;
+    static constexpr int kPlayerFavorableBoardValue = 160;
 
-    AITasksQueue m_tasksQueue;
+    static constexpr int kTieValue = 5;
+    static constexpr int kMaxDepth = 16;  // Set a max depth/ goal 10 ->12 would be great
 
+    // AITasksQueue m_tasksQueue;
+
+    int controlDepth = kMaxDepth / 2; // half the max at the start
+    int roundCount = 0;
+    int expandCounterMax = 9; 
 public:
-    explicit TicTacToeMinimaxAi(Board* pBoard)
+    explicit MinimaxAi(Board* pBoard)
         : GameAi(pBoard)
     {
         //
     }
 
-    bool IsTerminalState(const Board* pBoard)
+    bool IsTerminal(const Board* pBoard)
     {
-        int winner = pBoard->GetWinner();
+        const int winner = pBoard->GetWinner();
         return (winner == kAi || winner == kPlayer || winner == -1);
     }
 
 
-    int TicTacToeMinimaxAi::Minimax(const Board* pBoard, int depth, bool isMax, int alpha, int beta)
+    int Minimax(const Board* pBoard, int depth, bool isMax, int alpha, int beta)
     {
-        if (depth >= kMaxDepth || IsTerminalState(pBoard))
+        if (depth >= controlDepth || IsTerminal(pBoard))
         {
             return EvaluateBoard(pBoard);
         }
-
-        std::unique_ptr<Board> clonedBoard(pBoard->Clone());
 
         // Get legal moves
         std::vector<Move> legalMoves = pBoard->GetLegalMoves();
@@ -50,6 +54,7 @@ public:
 
         for (const Move& move : legalMoves)
         {
+            std::unique_ptr<Board> clonedBoard(pBoard->Clone());
             clonedBoard->MakeMove(move);
 
             // Check for a winner after the move
@@ -57,16 +62,6 @@ public:
 
             if (moveVal == kWinMoveValue || moveVal == -kWinMoveValue || moveVal == kTieValue)
                 return moveVal;
-            //if (winner == kWinMoveValue)
-            //{
-            //    //std::cout << "AI wins with move: " << move.boardIndex << std::endl;
-            //    return kWinMoveValue;  // AI wins
-            //}
-            //if (winner == -kWinMoveValue)
-            //{
-            //    //std::cout << "Player wins with move: " << move.boardIndex << std::endl;
-            //    return -kWinMoveValue; // Player wins
-            //}
 
             // Continue if no winner
             int moveScore = Minimax(clonedBoard.get(), depth + 1, !isMax, alpha, beta);
@@ -91,14 +86,45 @@ public:
 
     int EvaluateBoard(const Board* pBoard)
     {
-        int winner = pBoard->GetWinner();
+        const int winner = pBoard->GetWinner();
         if (winner == kAi) return kWinMoveValue; // AI wins
         if (winner == kPlayer) return -kWinMoveValue; // Player wins
         if (winner == -1) return kTieValue; // Draw
-        return 0; // No winner yet
+
+        int score = 0;
+
+        // Check for favorable patterns
+        std::vector<Move> aiThreats = MinimaxAi::GetThreat(pBoard, kAi);
+        std::vector<Move> playerThreats = MinimaxAi::GetThreat(pBoard, kPlayer);
+
+        // scores based on detected threats
+        score += aiThreats.size() * kAiFavorableBoardValue;       // Reward AI for opportunities
+        score -= playerThreats.size() * kPlayerFavorableBoardValue;   // Penalize if Player has threats
+
+
+        return score; // No winner yet
     }
 
-    virtual ~TicTacToeMinimaxAi() override;
+    std::vector<Move> GetThreat(const Board* pBoard, int player)
+    {
+        std::vector<Move> threats;
+        const std::vector<Move> legalMoves = pBoard->GetLegalMoves();
+
+        for (const Move& move : legalMoves)
+        {
+            std::unique_ptr<Board> tempBoard(pBoard->Clone());
+            tempBoard->MakeMove(move);
+
+            if (tempBoard->GetWinner() == player)
+            {
+                threats.push_back(move);
+            }
+        }
+
+        return threats;
+    }
+
+    virtual ~MinimaxAi() override;
 
     virtual Move FindBestMove() override;
     Move DetectImmediateMove(int player);

@@ -1,13 +1,29 @@
-#include "TicTacToeMinimaxAi.h"
+#include "MinimaxAi.h"
 
-TicTacToeMinimaxAi::~TicTacToeMinimaxAi()
+#include <future>
+
+MinimaxAi::~MinimaxAi()
 {
     //
 }
-Move TicTacToeMinimaxAi::FindBestMove()
+
+Move MinimaxAi::FindBestMove()
 {
+    ++roundCount;
+    if (roundCount >= expandCounterMax)
+    {
+        std::cout << "AI Expanding Depth!\n";
+        ++controlDepth;
+
+        if (controlDepth >= kMaxDepth)
+        {
+            std::cout << "AI at mox Depth!\n";
+            controlDepth = kMaxDepth;
+        }
+    }
+
     auto startTime = std::chrono::steady_clock::now();
-    constexpr auto timeLimit = std::chrono::milliseconds(2000);  // 2 seconds time limit
+    constexpr auto timeLimit = std::chrono::milliseconds(1000);
 
     Move bestMove = { -1, -1 }; // Invalid move
 
@@ -16,6 +32,7 @@ Move TicTacToeMinimaxAi::FindBestMove()
     Move winningMove = DetectImmediateMove(kAi);
     if (winningMove.boardIndex != -1) return winningMove; // Check explicitly
 
+    // Take an easy block
     // Check for immediate blocking move
     Move blockingMove = DetectImmediateMove(kPlayer);
     if (blockingMove.boardIndex != -1) return blockingMove; // Check explicitly
@@ -26,6 +43,7 @@ Move TicTacToeMinimaxAi::FindBestMove()
     for (int depth = 1; depth <= kMaxDepth; ++depth)
     {
         std::vector<Move> legalMoves = m_pBoard->GetLegalMoves();
+
         int alpha = -kScoreInf, beta = kScoreInf;
 
         for (const Move& move : legalMoves)
@@ -50,49 +68,18 @@ Move TicTacToeMinimaxAi::FindBestMove()
             auto now = std::chrono::steady_clock::now();
             if (now - startTime > timeLimit)
             {
+                std::cout << "Time Limit Reached\n";
                 return bestMove;  // Stop searching if time runs out
             }
         }
     }
 
+    std::cout << "Max Depth Reached\n";
+
     return bestMove;
 }
 
-
-//Move MinimaxAi::FindBestMove()
-//{
-//    std::vector<Move> legalMoves = m_pBoard->GetLegalMoves();
-//    int bestScore = -kScoreInf;
-//    Move bestMove = { -1, -1 }; // Invalid move
-//
-//    // Check for immediate winning move
-//    Move winningMove = DetectImmediateMove(kAi);
-//    if (winningMove.boardIndex != -1) return winningMove; // Check explicitly
-//
-//    // Check for immediate blocking move
-//    Move blockingMove = DetectImmediateMove(kPlayer);
-//    if (blockingMove.boardIndex != -1) return blockingMove; // Check explicitly
-//
-//
-//    for (const Move& move : legalMoves)
-//    {
-//
-//        std::unique_ptr<Board> clonedBoard(m_pBoard->Clone());
-//        clonedBoard->MakeMove(move);
-//
-//        int moveScore = Minimax(clonedBoard.get(), 0, false, -kScoreInf, kScoreInf);
-//
-//        if (moveScore > bestScore)
-//        {
-//            bestScore = moveScore;
-//            bestMove = move;
-//        }
-//    }
-//
-//    return bestMove;
-//}
-
-Move TicTacToeMinimaxAi::DetectImmediateMove(int player)
+Move MinimaxAi::DetectImmediateMove(int player)
 {
     std::vector<Move> legalMoves = m_pBoard->GetLegalMoves();
 
@@ -110,5 +97,5 @@ Move TicTacToeMinimaxAi::DetectImmediateMove(int player)
         }
     }
 
-    return Move(-1, -1); // Ensure it explicitly returns an invalid move
+    return Move(-1, -1); // return an invalid move
 }

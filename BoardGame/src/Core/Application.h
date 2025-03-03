@@ -2,7 +2,7 @@
 #pragma once
 
 // If 1, the game is tic-tac-toe.  If 0, it is connect four.
-#define PLAY_TIC_TAC_TOE 1
+#define PLAY_TIC_TAC_TOE 0
 
 #if PLAY_TIC_TAC_TOE
     #include "../TicTacToe/TicTacToeBoard.h"
@@ -11,7 +11,7 @@
 #endif
 
 #include "../GenericImplementations/RandomAi.h"
-#include "../MinimaxAi/TicTacToeMinimaxAi.h"
+#include "../MinimaxAi/MinimaxAi.h"
 
 class Application
 {
@@ -22,7 +22,7 @@ class Application
 #endif
 
     //RandomAi m_ai;  // TODO: Replace this with your AI implementation
-    TicTacToeMinimaxAi m_ai;  // TODO: Replace this with your AI implementation
+    MinimaxAi m_ai;  // TODO: Replace this with your AI implementation
 
 public:
     Application();
