@@ -2,7 +2,7 @@
 #pragma once
 
 // If 1, the game is tic-tac-toe.  If 0, it is connect four.
-#define PLAY_TIC_TAC_TOE 0
+#define PLAY_TIC_TAC_TOE 1
 
 #if PLAY_TIC_TAC_TOE
     #include "../TicTacToe/TicTacToeBoard.h"

@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <string>
 
-#define SHOWINDEXES 1
+#define SHOWINDEXES 0
 
 TicTacToeGameState::TicTacToeGameState()
 {

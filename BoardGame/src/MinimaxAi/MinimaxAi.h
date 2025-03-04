@@ -2,11 +2,16 @@
 #include <iostream>
 #include <ostream>
 #include <thread>
-
-#include "AITasksQueue.h"
 #include "../Interface/GameAi.h"
 #include "../TicTacToe/TicTacToeBoard.h"
 
+
+// Souces and research:
+// https://algocademy.com/blog/implementing-game-algorithms-minimax-and-alpha-beta-pruning/
+// 1. Transposition tables are used to store previously evaluated board positions
+// 3. Late Move Reduction (LMR) is based on the assumption that later moves in an ordered move list are less likely to be good. It reduces the depth of the search for these moves
+// 4. For many games, the early moves have been thoroughly analyzed. Using an opening book can save computation time and improve play in the early game
+//
 class MinimaxAi : public GameAi
 {
     static constexpr int kAi = 2;
@@ -21,7 +26,9 @@ class MinimaxAi : public GameAi
     static constexpr int kTieValue = 5;
     static constexpr int kMaxDepth = 16;  // Set a max depth/ goal 10 ->12 would be great
 
-    // AITasksQueue m_tasksQueue;
+    // AITasksQueue m_tasksQueue; Ran out of time: But the idea was to queue up Minimax in FindBestMove
+    // and have atomics for alpha and beta, but i need more practice with futures and threading and
+    // atomics in a less stress filled task and time limit
 
     int controlDepth = kMaxDepth / 2; // half the max at the start
     int roundCount = 0;
@@ -94,8 +101,8 @@ public:
         int score = 0;
 
         // Check for favorable patterns
-        std::vector<Move> aiThreats = MinimaxAi::GetThreat(pBoard, kAi);
-        std::vector<Move> playerThreats = MinimaxAi::GetThreat(pBoard, kPlayer);
+        std::vector<Move> aiThreats = GetThreatCount(pBoard, kAi);
+        std::vector<Move> playerThreats = GetThreatCount(pBoard, kPlayer);
 
         // scores based on detected threats
         score += aiThreats.size() * kAiFavorableBoardValue;       // Reward AI for opportunities
@@ -105,7 +112,7 @@ public:
         return score; // No winner yet
     }
 
-    std::vector<Move> GetThreat(const Board* pBoard, int player)
+    std::vector<Move> GetThreatCount(const Board* pBoard, int player)
     {
         std::vector<Move> threats;
         const std::vector<Move> legalMoves = pBoard->GetLegalMoves();
